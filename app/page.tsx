@@ -13,17 +13,7 @@ const initialMessages: Message[] = [
   {
     id: 1,
     role: "assistant",
-    text: "Hi! I am your resume assistant. Ask about skills, projects, or experience."
-  },
-  {
-    id: 2,
-    role: "user",
-    text: "Give me a quick summary of your background."
-  },
-  {
-    id: 3,
-    role: "assistant",
-    text: "I am a software engineer focused on building reliable web products, with experience in frontend systems, APIs, and AI-powered workflows."
+    text: "Hi! I am Saddam's AI Assistant Trained his My Professional Experience. Ask about skills, projects, or experience."
   }
 ];
 
