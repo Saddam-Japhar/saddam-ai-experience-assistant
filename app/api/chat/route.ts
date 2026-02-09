@@ -1,5 +1,8 @@
 import { Pool } from "pg";
 import { readFile } from "fs/promises";
+import OpenAI from "openai";
+import { Agent, tool, run, setDefaultOpenAIClient, setOpenAIAPI } from "@openai/agents";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 
@@ -24,6 +27,69 @@ const EMBEDDING_DIM = Number(process.env.EMBEDDING_DIM || "3072");
 const EMBEDDINGS_FILE =
   process.env.RESUME_EMBEDDINGS_PATH || "data/resumeEmbeddings.json";
 let pool: any = null;
+let isAgentsSdkConfigured = false;
+
+const sendPushoverMessage = async (message: string) => {
+  const result = await fetch(`${process.env.PUSHOVER_URL}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      token: process.env.PUSHOVER_TOKEN,
+      user: process.env.PUSHOVER_USER,
+      message
+    })
+  });
+
+  if (!result.ok) {
+    const body = await result.text();
+    throw new Error(`Failed to send pushover message (${result.status}): ${body}`);
+  }
+
+  return result.json();
+};
+
+
+const recordUserDetailsTool = tool({
+  name: "record_user_details",
+  description:
+    "Use this tool to record that a user is interested in being in touch and provided an email address",
+  parameters: z.object({
+    email: z.string().describe("The email address of this user")
+  }),
+  execute: async ({ email }) => {
+    console.log("[tool:record_user_details] called with email:", email);
+    const data = await sendPushoverMessage(
+      `User is interested in being in touch and provided an email address ${email}`
+    );
+    return { success: true, data };
+  }
+});
+
+const recordUnknownQuestionTool = tool({
+  name: "record_unknown_question",
+  description:
+    "Always use this tool to record any question that couldn't be answered as you didn't know the answer",
+  strict: true,
+  parameters: {
+    type: "object",
+    properties: {
+      question: {
+        type: "string",
+        description: "The question that couldn't be answered"
+      }
+    },
+    required: ["question"],
+    additionalProperties: false
+  },
+  execute: async (input) => {
+    const { question } = input as { question: string };
+    const data = await sendPushoverMessage(`Question: "${question}" couldn't be answered`);
+    return { success: true, data };
+  }
+});
+
 
 // Returns a singleton Postgres pool for database queries.
 const getPool = () => {
@@ -34,6 +100,18 @@ const getPool = () => {
     ssl: { rejectUnauthorized: false }
   });
   return pool;
+};
+
+const configureAgentsSdk = () => {
+  console.log("Configuring agents SDK", isAgentsSdkConfigured);
+  if (isAgentsSdkConfigured) return;
+  const client = new OpenAI({
+    apiKey: CHAT_API_KEY,
+    baseURL: CHAT_BASE_URL
+  });
+  setDefaultOpenAIClient(client);
+  setOpenAIAPI("chat_completions");
+  isAgentsSdkConfigured = true;
 };
 
 // Generates an embedding vector for the provided input text.
@@ -188,6 +266,7 @@ export async function POST(request: Request) {
         - Briefly summarize the relevant skills and experience that ARE present.
       - Keep the response concise and professional.
       - Do NOT claim or imply experience you do not have.
+      - Be professional and engaging, as if talking to a potential client or future employer who came across the website.
       
       2. General or Conversational Questions
       
@@ -205,82 +284,47 @@ export async function POST(request: Request) {
       - Professional, clear, and recruiter-friendly.
       - Concise, confident, and honest.
       - Always stay in character as Saddam Japhar.
+      - Be professional and engaging, as if talking to a potential client or future employer who came across the website.
+
+      Tools:
+      - If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer, even if it's about something trivial or unrelated to career.
+      - If the user message contains an email address, you MUST call record_user_details with that email before replying.
+      - If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool and acknowledge that you'll reach out soon.
+      - record_user_details: Use this tool to record that a user is interested in being in touch and provided an email address
+      - record_unknown_question: Use this tool to record any question that couldn't be answered as you didn't know the answer
       
       Context:
       ${context}
       `;
 
-    const completionResponse = await fetch(`${CHAT_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${CHAT_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: CHAT_MODEL,
-        stream: true,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ]
-      })
-    });
-
-    if (!completionResponse.ok) {
-      return Response.json(
-        { error: await completionResponse.text() },
-        { status: 500 }
-      );
-    }
+    configureAgentsSdk();
 
     const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
+    const agent = new Agent({
+      name: "Saddam Resume Assistant",
+      model: CHAT_MODEL,
+      instructions: systemPrompt,
+      tools: [recordUserDetailsTool, recordUnknownQuestionTool]
+    });
 
     const stream = new ReadableStream({
       async start(controller) {
-        const reader = completionResponse.body?.getReader();
-        if (!reader) {
-          controller.close();
-          return;
-        }
-
-        let buffer = "";
-        let closed = false;
         try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() ?? "";
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed.startsWith("data:")) continue;
-
-              const payload = trimmed.replace(/^data:\s*/, "");
-              if (payload === "[DONE]") {
-                controller.close();
-                closed = true;
-                return;
-              }
-
-              try {
-                const json = JSON.parse(payload);
-                const delta = json.choices?.[0]?.delta?.content;
-                if (typeof delta === "string" && delta.length > 0) {
-                  controller.enqueue(encoder.encode(delta));
-                }
-              } catch {
-                // Ignore parse errors for non-content SSE lines.
-              }
+          const agentRun = await run(agent, message, { stream: true });
+          for await (const event of agentRun) {
+            if (
+              event.type === "raw_model_stream_event" &&
+              event.data?.type === "output_text_delta" &&
+              typeof event.data?.delta === "string" &&
+              event.data.delta.length > 0
+            ) {
+              controller.enqueue(encoder.encode(event.data.delta));
             }
           }
+          await agentRun.completed;
+          controller.close();
         } catch (error) {
           controller.error(error);
-        } finally {
-          if (!closed) controller.close();
         }
       }
     });
