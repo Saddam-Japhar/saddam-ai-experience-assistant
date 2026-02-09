@@ -13,7 +13,7 @@ const initialMessages: Message[] = [
   {
     id: 1,
     role: "assistant",
-    text: "Hi! I am Saddam's AI Assistant Trained his My Professional Experience. Ask about skills, projects, or experience."
+    text: "I’m Saddam’s AI assistant. Ask me anything about his professional experience."
   }
 ];
 
