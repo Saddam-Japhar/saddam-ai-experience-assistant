@@ -1,0 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS rag_embeddings (
+  id TEXT PRIMARY KEY,
+  section TEXT NOT NULL,
+  chunk_text TEXT NOT NULL,
+  embedding VECTOR(3072) NOT NULL
+);

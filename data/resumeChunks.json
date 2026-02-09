@@ -1,0 +1,37 @@
+[
+  {
+    "id": "summary-001",
+    "section": "summary",
+    "chunk_text": "Software Development Lead with 7+ years of experience architecting and delivering scalable, high-performance web applications. AWS Certified Developer - Associate with strong expertise in JavaScript, React, Next.js, Node.js, and cloud-native solutions. Led large-scale migrations and modernization initiatives, including a WordPress-to-Next.js transition that reduced error rates by 90% and significantly improved performance. Skilled in end-to-end product development, CI/CD implementation with CircleCI and ArgoCD, and mentoring cross-functional teams across geographies. Passionate about solving complex engineering problems through clean architecture, strong system design, and practical innovation. Recently focused on applied LLM engineering, Retrieval-Augmented Generation, and AI-driven system design."
+  },
+  {
+    "id": "experience-001",
+    "section": "experience",
+    "chunk_text": "Software Development Lead, Realtor.com (Move Inc.) via Brillio, January 2023 to Present. Led migration of a large-scale website from WordPress to React and Next.js, improving load times and reducing error rates by over 90%. Architected an automated related-articles recommendation system using AWS Lambda, Elasticsearch, SQS, DynamoDB, SNS, and CircleCI, eliminating manual tagging, improving real-time content relevance, and increasing editorial efficiency. Migrated CI/CD infrastructure from Jenkins and ECS to CircleCI, ArgoCD, and Amazon EKS, reducing build times and improving deployment stability across four repositories. Acted as onshore coordinator, working directly with clients, product managers, and stakeholders to align delivery with business priorities. Mentored onshore and offshore developers, promoted Agile practices through regular knowledge-sharing, led code reviews, enforced clean coding standards, introduced unit and integration testing strategies, and automated recurring editorial email updates to reduce manual communication errors."
+  },
+  {
+    "id": "experience-002",
+    "section": "experience",
+    "chunk_text": "Senior Software Engineer, Realtor.com (Move Inc.) via Brillio, February 2020 to February 2026. Developed and maintained complex, high-traffic web applications using React, Node.js, and Express.js. Troubleshot and resolved critical production incidents through log analysis, root-cause investigation, and implementation of long-term corrective fixes. Built reusable React components and shared libraries that improved development speed and UI consistency across teams. Designed RESTful APIs and integrated third-party services to streamline backend workflows and data exchange. Deployed and monitored AWS Lambda and CloudFront functions to support serverless architecture patterns. Conducted detailed code reviews, reinforced clean engineering standards, and introduced unit and integration testing practices to improve quality and release confidence."
+  },
+  {
+    "id": "experience-003",
+    "section": "experience",
+    "chunk_text": "Engineer, Mindtree, July 2017 to February 2020. Developed and maintained end-to-end JavaScript-based web applications focused on access management and internal engineering tools. Delivered the Central Access Management (CAM) system to streamline database, server, and account access through one-click automation. Collaborated closely with QA and DevOps teams in an Agile delivery model to ensure high-quality, timely releases. Contributed to sprint planning, backlog grooming, and daily stand-ups, supporting consistent execution and continuous team improvement."
+  },
+  {
+    "id": "skills-001",
+    "section": "skills",
+    "chunk_text": "Programming Languages: JavaScript, TypeScript, Python, HTML, CSS. Frontend Frameworks and Libraries: React.js, Next.js. Backend Frameworks: Node.js, Express.js. Databases: MySQL, PostgreSQL, SQL Server, MongoDB, NoSQL. API Development: RESTful APIs, GraphQL. Cloud Platforms: AWS. CI/CD and Automation: CircleCI, Jenkins, Docker, Kubernetes, ArgoCD. Version Control and Tools: Git, GitHub, Jira, Visual Studio Code. Monitoring and Logging: New Relic, Splunk, Parse.ly. AI and LLM Engineering: Retrieval-Augmented Generation (RAG), LLM engineering and prompt design, QLoRA fine-tuning concepts, agent-based systems, OpenAI Agents SDK, CrewAI, LangGraph, AutoGen, and Model Context Protocol (MCP)."
+  },
+  {
+    "id": "education-001",
+    "section": "education",
+    "chunk_text": "Bachelor of Engineering in Computer Science, Visvesvaraya Technological University, 2013-2017. Participated in the National Level Big Data Championship at IIT Roorkee. Completed Infosys Campus Connect training in business communication and teamwork. Certifications include AWS Certified Developer - Associate (2023-2026), Certified SAFe 5 Practitioner (Credential ID: 25746668-1197), Leadership Skills, Leading and Motivating People with Different Personalities, Influence and Persuasion, and Leading Teams."
+  },
+  {
+    "id": "additional-information",
+    "section": "additional-information",
+    "chunk_text": "Languages: Hindi (Fluent), Nepali (Fluent), English (Fluent). Hobbies: Reading, Traveling, Listening to Music. Communication: Excellent verbal and written communication skills; experienced in cross-functional collaboration and mentoring diverse teams"
+  }
+]
